@@ -192,6 +192,7 @@ let money =
     parseInt(localStorage.getItem("money")) || 0;
 
 let unlocked = false;
+let unlockTimer = null;
 
 function saveMoney(){
     localStorage.setItem("money", money);
@@ -245,9 +246,20 @@ document.getElementById("unlock").onclick = () => {
     const entered = prompt("Password:");
 
     if(checkPassword(entered || "")){
+
         unlocked = true;
+
         localStorage.setItem("failures","0");
-        alert("Unlocked");
+
+        if(unlockTimer){
+            clearTimeout(unlockTimer);
+        }
+
+        unlockTimer = setTimeout(() => {
+            unlocked = false;
+        }, 10000);
+
+        alert("Unlocked for 10 seconds");
         return;
     }
 
