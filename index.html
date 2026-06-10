@@ -225,15 +225,13 @@ if (isLockedOut()) {
     showLockedScreen();
 }
 
+/* --- FISH ANIMATION  --- */
 function createFish(){
     const f = document.createElement("div");
     f.className = "fish";
-
     resetFish(f);
-
     fishLayer.appendChild(f);
     fishArray.push(f);
-
     return f;
 }
 
@@ -267,6 +265,7 @@ function animateFish(){
 }
 animateFish();
 
+/* --- GAME BUTTONS (UNCHANGED) --- */
 document.getElementById("plus").onclick = () => {
     if (isLockedOut() || !u) return;
 
@@ -289,7 +288,8 @@ document.getElementById("minus").onclick = () => {
     rn();
 };
 
-document.getElementById("unlockBtn").onclick = () => {
+/* --- 🔐 SECURE UNLOCK (UPDATED) --- */
+document.getElementById("unlockBtn").onclick = async () => {
 
     if (isLockedOut()) {
         showLockedScreen();
@@ -297,25 +297,34 @@ document.getElementById("unlockBtn").onclick = () => {
         return;
     }
 
-    const password = String.fromCharCode(
-        119,111,110,100,101,114,102,117,108,119,101,54,57,54,57
-    );
-
     const p = prompt("Password:");
 
-    if ((p || "") === password) {
-        u = true;
-        setTimeout(() => u = false, 10000);
+    try {
+        const res = await fetch("https://YOUR-WORKER-URL.workers.dev/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password: p })
+        });
 
-        failCount = 0;
-        lockUntil = 0;
-        localStorage.setItem("failCount", 0);
-        localStorage.setItem("lockUntil", 0);
+        const data = await res.json();
 
-        alert("Unlocked for 10 seconds");
-    } else {
-        applyLockout();
-        alert(`Incorrect password (+${failCount * 10}s lockout)`);
+        if (data.ok) {
+            u = true;
+            setTimeout(() => u = false, 10000);
+
+            failCount = 0;
+            lockUntil = 0;
+            localStorage.setItem("failCount", 0);
+            localStorage.setItem("lockUntil", 0);
+
+            alert("Unlocked for 10 seconds");
+        } else {
+            applyLockout();
+            alert(`Incorrect password (+${failCount * 10}s lockout)`);
+        }
+
+    } catch (e) {
+        alert("Server error. Try again later.");
     }
 };
 
