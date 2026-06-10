@@ -123,7 +123,7 @@ button{
     color:white;
 }
 
-/* unlock button fully invisible */
+/* unlock button invisible */
 #unlockBtn{
     position:fixed;
     top:20px;
@@ -137,7 +137,7 @@ button{
     cursor:pointer;
 }
 
-/* LOCKED SCREEN */
+/* LOCK SCREEN */
 #lockedScreen{
     position:fixed;
     inset:0;
@@ -159,7 +159,6 @@ button{
 <body>
 
 <button id="unlockBtn">🔓</button>
-
 <div id="lockedScreen">LOCKED</div>
 
 <div class="bubbles">
@@ -181,20 +180,18 @@ button{
 (() => {
 
 const fishLayer = document.querySelector(".fish-layer");
-const fishCount = 10;
 const fishArray = [];
 
 const lockedScreen = document.getElementById("lockedScreen");
 
-/* ---------------- MONEY ---------------- */
-const m = document.getElementById("money");
 let n = parseInt(localStorage.getItem("money")) || 0;
 let u = false;
 
 const sv = () => localStorage.setItem("money", n);
+const m = document.getElementById("money");
 const rn = () => m.textContent = "$" + n;
 
-/* ---------------- LOCKOUT SYSTEM ---------------- */
+/* LOCK SYSTEM */
 let failCount = parseInt(localStorage.getItem("failCount")) || 0;
 let lockUntil = parseInt(localStorage.getItem("lockUntil")) || 0;
 
@@ -203,10 +200,6 @@ const isLockedOut = () => Date.now() < lockUntil;
 const showLockedScreen = () => {
     lockedScreen.style.opacity = "1";
     lockedScreen.style.pointerEvents = "all";
-    setTimeout(() => {
-        lockedScreen.style.opacity = "0";
-        lockedScreen.style.pointerEvents = "none";
-    }, 1000);
 };
 
 const applyLockout = () => {
@@ -216,14 +209,15 @@ const applyLockout = () => {
     const duration = failCount * 10000;
     lockUntil = Date.now() + duration;
     localStorage.setItem("lockUntil", lockUntil);
+
+    showLockedScreen();
 };
 
-/* ---------------- NEW: PERSISTENT LOCK SCREEN ON REFRESH ---------------- */
 if (isLockedOut()) {
     showLockedScreen();
 }
 
-/* ---------------- FISH SPAWN ---------------- */
+/* FISH */
 function createFish(){
     const f = document.createElement("div");
     f.className = "fish";
@@ -233,17 +227,10 @@ function createFish(){
     fishLayer.appendChild(f);
     fishArray.push(f);
 
-    f.addEventListener("mousemove", () => {
-        f.style.opacity = "0";
-        setTimeout(() => resetFish(f), 2000);
-    });
-
     return f;
 }
 
 function resetFish(f){
-    f.style.opacity = "0.5";
-
     const fromLeft = Math.random() > 0.5;
 
     f.style.top = Math.random() * window.innerHeight + "px";
@@ -253,9 +240,7 @@ function resetFish(f){
     f.dataset.dir = fromLeft ? 1 : -1;
 }
 
-for(let i=0;i<fishCount;i++){
-    createFish();
-}
+for(let i=0;i<10;i++) createFish();
 
 function animateFish(){
     fishArray.forEach(f => {
@@ -275,19 +260,35 @@ function animateFish(){
 }
 animateFish();
 
-/* ---------------- UI ---------------- */
+/* BUTTONS */
 document.getElementById("plus").onclick = () => {
-    if(!u){return;}
-    n++; sv(); rn();
+    if (isLockedOut() || !u) {
+        alert("Unlock first");
+        return;
+    }
+    n++;
+    sv();
+    rn();
 };
 
 document.getElementById("minus").onclick = () => {
-    if(!u){return;}
-    n--; sv(); rn();
+    if (isLockedOut() || !u) {
+        alert("Unlock first");
+        return;
+    }
+    n--;
+    sv();
+    rn();
 };
 
-/* ---------------- UNLOCK BUTTON ---------------- */
+/* UNLOCK */
 document.getElementById("unlockBtn").onclick = () => {
+
+    if (isLockedOut()) {
+        showLockedScreen();
+        alert("LOCKED OUT");
+        return;
+    }
 
     const password = String.fromCharCode(
         71,73,84,72,85,66,105,115,104,97,114,100
@@ -295,17 +296,11 @@ document.getElementById("unlockBtn").onclick = () => {
 
     const p = prompt("Password:");
 
-    if(isLockedOut()){
-        alert("LOCKED OUT");
-        return;
-    }
-
-    if((p || "") === password){
+    if ((p || "") === password) {
         u = true;
-        setTimeout(()=> u = false, 10000);
+        setTimeout(() => u = false, 10000);
         alert("Unlocked for 10 seconds");
     } else {
-        showLockedScreen();
         applyLockout();
         alert(`Incorrect password (+${failCount * 10}s lockout)`);
     }
