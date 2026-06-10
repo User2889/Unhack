@@ -60,7 +60,7 @@ body {
     text-shadow: 0 0 25px rgba(180, 220, 255, 0.9);
 }
 
-/* PASTEL SPACE BUTTONS */
+/* BUTTONS */
 .btn {
     padding: 14px 30px;
     margin: 10px;
@@ -135,6 +135,7 @@ audio { display:none; }
 </head>
 
 <body>
+
 <div class="space" id="space"></div>
 <div id="unlockBtn"></div>
 
@@ -162,6 +163,36 @@ const moneyEl = document.getElementById("money");
 const lockScreen = document.getElementById("lockScreen");
 const music = document.getElementById("bgMusic");
 
+/* SOUND SYSTEM */
+function playSound(type){
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+
+    o.connect(g);
+    g.connect(ctx.destination);
+
+    let freq = 300;
+    let duration = 0.1;
+
+    if(type === "click"){ freq = 200; duration = 0.05; }
+    if(type === "plus"){ freq = 520; }
+    if(type === "minus"){ freq = 180; }
+    if(type === "success"){ freq = 800; duration = 0.2; }
+    if(type === "error"){ freq = 120; duration = 0.3; }
+    if(type === "lock"){ freq = 60; duration = 0.4; }
+
+    o.frequency.value = freq;
+    o.type = "sine";
+
+    g.gain.setValueAtTime(0.2, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+
+    o.start();
+    o.stop(ctx.currentTime + duration);
+}
+
+/* MONEY */
 function updateMoney(){
     moneyEl.textContent = "$" + money;
     localStorage.setItem("money", money);
@@ -176,28 +207,40 @@ function startLock(sec){
     localStorage.setItem("lockEnd", lockEnd);
 
     lockScreen.style.display = "flex";
+    playSound("lock");
 
     const t = setInterval(()=>{
         let r = Math.max(0, lockEnd - Date.now());
+
         document.getElementById("lockText").textContent =
         "ACCESS DENIED — " + Math.ceil(r/1000) + "s";
 
-        if(r<=0){
+        if(r <= 0){
             clearInterval(t);
-            lockScreen.style.display="none";
+            lockScreen.style.display = "none";
         }
     },200);
 }
 
+/* CHANGE MONEY */
 function changeMoney(v){
-    if(!unlocked) return alert("ACCESS DENIED");
+    if(!unlocked){
+        playSound("error");
+        return alert("ACCESS DENIED");
+    }
     if(isLocked()) return;
+
     money += v;
     updateMoney();
+
+    playSound(v > 0 ? "plus" : "minus");
 }
 
+/* UNLOCK SYSTEM */
 document.getElementById("unlockBtn").addEventListener("click", ()=>{
     if(isLocked()) return;
+
+    playSound("click");
 
     const code = prompt("Access Terminal:");
 
@@ -206,11 +249,23 @@ document.getElementById("unlockBtn").addEventListener("click", ()=>{
         localStorage.setItem("unlocked","true");
         wrongStreak = 0;
         localStorage.setItem("wrongStreak","0");
+
+        playSound("success");
         alert("ACCESS GRANTED");
+
+        /* AUTO RELOCK AFTER 10 SECONDS */
+        setTimeout(()=>{
+            unlocked = false;
+            localStorage.setItem("unlocked","false");
+            startLock(10);
+        }, 10000);
+
     } else {
         wrongStreak++;
         localStorage.setItem("wrongStreak", wrongStreak);
-        startLock(10 + (wrongStreak-1)*10);
+
+        playSound("error");
+        startLock(10 + (wrongStreak - 1) * 10);
     }
 });
 
@@ -226,13 +281,15 @@ for(let i=0;i<200;i++){
     s.style.left = Math.random()*100 + "vw";
     s.style.top = Math.random()*100 + "vh";
     s.style.opacity = Math.random()*0.8 + 0.2;
-    s.style.animationDuration = (10 + Math.random()*20) + "s"; // slower
+    s.style.animationDuration = (10 + Math.random()*20) + "s";
     space.appendChild(s);
 }
 
 /* SPARKLES */
 window.addEventListener("click",(e)=>{
     if(e.target.tagName==="BUTTON") return;
+
+    playSound("click");
 
     for(let i=0;i<6;i++){
         const sp = document.createElement("div");
@@ -254,5 +311,6 @@ window.addEventListener("click", ()=>{
 if(isLocked()) startLock(Math.ceil((lockEnd-Date.now())/1000));
 updateMoney();
 </script>
+
 </body>
 </html>
