@@ -297,7 +297,7 @@ document.getElementById("unlockBtn").onclick = async () => {
     const p = prompt("Password:");
 
     try {
-        const res = await fetch("https://testunhack.lucius-tan-bo-xu.workers.dev", {
+        const res = await fetch("https://testunhack.lucius-tan-bo-xu.workers.dev/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ password: p })
