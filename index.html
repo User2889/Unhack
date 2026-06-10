@@ -99,6 +99,32 @@ body::before{
     animation:sway 6s ease-in-out infinite alternate;
 }
 
+/* 🌿 CORALS */
+.corals{
+    position:fixed;
+    bottom:0;
+    width:100%;
+    height:140px;
+    pointer-events:none;
+    z-index:-1;
+}
+
+.corals div{
+    position:absolute;
+    bottom:0;
+    width:18px;
+    background:linear-gradient(#ff7aa2,#ff3d7f);
+    border-radius:10px;
+    opacity:.75;
+}
+
+.corals div:nth-child(1){left:15%;height:90px;transform:rotate(-10deg);}
+.corals div:nth-child(2){left:22%;height:60px;transform:rotate(12deg);}
+.corals div:nth-child(3){left:30%;height:110px;transform:rotate(-6deg);}
+.corals div:nth-child(4){left:68%;height:80px;transform:rotate(8deg);}
+.corals div:nth-child(5){left:75%;height:100px;transform:rotate(-14deg);}
+.corals div:nth-child(6){left:82%;height:70px;transform:rotate(10deg);}
+
 @keyframes sway{
     from{transform:skewX(-2deg) translateX(-5px);}
     to{transform:skewX(2deg) translateX(5px);}
@@ -122,10 +148,9 @@ body::before{
     border-radius:60% 40% 60% 40%;
 
     opacity:.5;
-    transition:transform .15s ease-out;
+    transition:transform .08s ease-out;
 }
 
-/* tail */
 .fish-layer span::after{
     content:"";
     position:absolute;
@@ -137,7 +162,6 @@ body::before{
     border-bottom:8px solid transparent;
 }
 
-/* drift */
 .fish-layer span:nth-child(1){top:20%;left:10%; animation:drift1 18s linear infinite;}
 .fish-layer span:nth-child(2){top:40%;left:20%; animation:drift2 24s linear infinite;}
 .fish-layer span:nth-child(3){top:65%;left:5%; animation:drift3 20s linear infinite;}
@@ -226,6 +250,9 @@ button{
 </div>
 
 <div class="seaweed"></div>
+<div class="corals">
+  <div></div><div></div><div></div><div></div><div></div><div></div>
+</div>
 
 <div class="fish-layer">
   <span></span><span></span><span></span><span></span>
@@ -251,6 +278,11 @@ const w=document.getElementById("warning");
 let n=parseInt(localStorage.getItem("money"))||0;
 let u=false;
 
+/* persistent lockout */
+let lockUntil=parseInt(localStorage.getItem("lockUntil"))||0;
+
+const isLockedOut=()=>Date.now()<lockUntil;
+
 const sv=()=>localStorage.setItem("money",n);
 const rn=()=>m.textContent="$"+n;
 
@@ -259,7 +291,14 @@ const lk=()=>{
     setTimeout(()=>w.style.display="none",1000);
 };
 
+/* unlock button */
 document.getElementById("unlock").onclick=()=>{
+
+    if(isLockedOut()){
+        const left=Math.ceil((lockUntil-Date.now())/1000);
+        alert("Locked out for "+left+"s");
+        return;
+    }
 
     const p=prompt("Password:");
 
@@ -268,7 +307,9 @@ document.getElementById("unlock").onclick=()=>{
         setTimeout(()=>u=false,10000);
         alert("Unlocked for 10 seconds");
     }else{
-        alert("Incorrect password");
+        lockUntil=Date.now()+10000;
+        localStorage.setItem("lockUntil",lockUntil);
+        alert("Incorrect password (+10s lockout)");
     }
 };
 
@@ -283,7 +324,7 @@ document.getElementById("minus").onclick=()=>{
     n--;sv();rn();
 };
 
-/* fish mouse reaction */
+/* fish mouse reaction (STRONGER) */
 const fish=document.querySelectorAll(".fish-layer span");
 let mouse={x:innerWidth/2,y:innerHeight/2};
 
@@ -304,12 +345,12 @@ function animateFish(){
         const dist=Math.sqrt(dx*dx+dy*dy);
 
         let power=0;
-        if(dist<180) power=(180-dist)/180;
+        if(dist<220) power=(220-dist)/220;
 
         const angle=Math.atan2(dy,dx);
 
-        const x=Math.cos(angle)*power*40;
-        const y=Math.sin(angle)*power*40;
+        const x=Math.cos(angle)*power*80;
+        const y=Math.sin(angle)*power*80;
 
         f.style.transform=`translate(${x}px,${y}px)`;
     });
@@ -317,6 +358,11 @@ function animateFish(){
     requestAnimationFrame(animateFish);
 }
 animateFish();
+
+/* restore lockout on refresh */
+if(isLockedOut()){
+    console.log("Lockout active for",lockUntil-Date.now(),"ms");
+}
 
 rn();
 
