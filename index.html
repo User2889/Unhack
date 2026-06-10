@@ -182,10 +182,8 @@ button{
 <script>
 (() => {
 
-const bgm = document.getElementById("bgm");
 const clickSound = document.getElementById("clickSound");
 
-bgm.volume = 0.25;
 clickSound.volume = 0.4;
 
 const fishLayer = document.querySelector(".fish-layer");
@@ -225,14 +223,13 @@ if (isLockedOut()) {
     showLockedScreen();
 }
 
-/* --- FISH ANIMATION  --- */
+/* fish system unchanged */
 function createFish(){
     const f = document.createElement("div");
     f.className = "fish";
     resetFish(f);
     fishLayer.appendChild(f);
     fishArray.push(f);
-    return f;
 }
 
 function resetFish(f){
@@ -265,7 +262,7 @@ function animateFish(){
 }
 animateFish();
 
-/* --- GAME BUTTONS (UNCHANGED) --- */
+/* buttons unchanged */
 document.getElementById("plus").onclick = () => {
     if (isLockedOut() || !u) return;
 
@@ -288,7 +285,7 @@ document.getElementById("minus").onclick = () => {
     rn();
 };
 
-/* --- 🔐 SECURE UNLOCK (UPDATED) --- */
+/* 🔐 SECURE UNLOCK */
 document.getElementById("unlockBtn").onclick = async () => {
 
     if (isLockedOut()) {
@@ -324,7 +321,7 @@ document.getElementById("unlockBtn").onclick = async () => {
         }
 
     } catch (e) {
-        alert("Server error. Try again later.");
+        alert("Server error");
     }
 };
 
