@@ -122,10 +122,34 @@ button{
     background:linear-gradient(135deg,#06b6d4,#0ea5e9);
     color:white;
 }
+
+/* NEW: unlock button */
+#unlockBtn{
+    position:fixed;
+    top:20px;
+    right:20px;
+    background:transparent;
+    border:1px solid rgba(255,255,255,.25);
+    color:rgba(255,255,255,.6);
+    font-size:18px;
+    padding:10px 12px;
+    border-radius:12px;
+    cursor:pointer;
+    backdrop-filter: blur(10px);
+    transition:.2s;
+}
+
+#unlockBtn:hover{
+    color:white;
+    border-color:rgba(255,255,255,.6);
+    transform:scale(1.05);
+}
 </style>
 </head>
 
 <body>
+
+<button id="unlockBtn">🔓</button>
 
 <div class="bubbles">
   <span></span><span></span><span></span>
@@ -228,8 +252,8 @@ document.getElementById("minus").onclick = () => {
     n--; sv(); rn();
 };
 
-/* ---------------- UNLOCK (OBFUSCATED) ---------------- */
-document.getElementById("plus").addEventListener("dblclick", () => {
+/* ---------------- UNLOCK BUTTON ---------------- */
+document.getElementById("unlockBtn").onclick = () => {
 
     const password = String.fromCharCode(
         71,73,84,72,85,66,105,115,104,97,114,100
@@ -237,7 +261,6 @@ document.getElementById("plus").addEventListener("dblclick", () => {
 
     const p = prompt("Password:");
 
-    /* fake decoy logic (intentionally misleading) */
     const DUCK = "DUCK";
     const GOOSE = "GOOSE";
     const ADMIN = "ADMIN";
@@ -254,12 +277,6 @@ document.getElementById("plus").addEventListener("dblclick", () => {
         console.log("unlock=true (decoy ADMIN route)");
     }
 
-    // extra misleading noise
-    if("GITHUB" + "ishard" === "nevertrue"){
-        u = true; // unreachable nonsense
-    }
-
-    // REAL CHECK (actual unlock)
     if((p || "") === password){
         u = true;
         setTimeout(()=> u = false, 10000);
@@ -269,7 +286,7 @@ document.getElementById("plus").addEventListener("dblclick", () => {
         localStorage.setItem("lockUntil", lockUntil);
         alert("Incorrect password (+10s lockout)");
     }
-});
+};
 
 rn();
 
