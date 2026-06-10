@@ -4,17 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>💰</title>
+<title>🌊 Ocean Bank</title>
 
 <style>
-:root{
-    --bg:#031926;
-    --card:rgba(0,70,100,.25);
-    --accent:#00c6ff;
-    --accent2:#00ffd5;
-    --text:#e8fcff;
-}
-
 *{box-sizing:border-box}
 
 body{
@@ -25,93 +17,181 @@ body{
     align-items:center;
     overflow:hidden;
     user-select:none;
-    color:var(--text);
     font-family:"Segoe UI",Arial,sans-serif;
+    color:#e8fcff;
+
     background:
-        radial-gradient(circle at 50% 0%,#0ea5e9 0%,transparent 40%),
-        linear-gradient(to bottom,#0c4a6e,#082f49,#031926);
+        radial-gradient(circle at top,#38bdf8 0%,transparent 30%),
+        linear-gradient(
+            to bottom,
+            #0ea5e9 0%,
+            #0284c7 20%,
+            #0369a1 45%,
+            #0c4a6e 70%,
+            #082f49 100%
+        );
 }
 
-.blob{
+/* light rays */
+body::before{
+    content:"";
     position:fixed;
+    inset:0;
+    background:repeating-linear-gradient(
+        115deg,
+        rgba(255,255,255,.06) 0px,
+        rgba(255,255,255,.06) 2px,
+        transparent 2px,
+        transparent 120px
+    );
+    opacity:.25;
+    pointer-events:none;
+}
+
+/* bubbles */
+.bubbles{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    z-index:-2;
+}
+
+.bubbles span{
+    position:absolute;
+    bottom:-100px;
     border-radius:50%;
-    filter:blur(90px);
+    background:rgba(255,255,255,.15);
+    animation:bubble linear infinite;
+}
+
+.bubbles span:nth-child(1){left:10%;width:40px;height:40px;animation-duration:12s;}
+.bubbles span:nth-child(2){left:25%;width:20px;height:20px;animation-duration:8s;}
+.bubbles span:nth-child(3){left:45%;width:60px;height:60px;animation-duration:16s;}
+.bubbles span:nth-child(4){left:65%;width:25px;height:25px;animation-duration:9s;}
+.bubbles span:nth-child(5){left:80%;width:45px;height:45px;animation-duration:14s;}
+.bubbles span:nth-child(6){left:90%;width:30px;height:30px;animation-duration:11s;}
+
+@keyframes bubble{
+    from{transform:translateY(0);opacity:0;}
+    20%{opacity:1;}
+    to{transform:translateY(-120vh);opacity:0;}
+}
+
+/* seaweed */
+.seaweed{
+    position:fixed;
+    bottom:-20px;
+    left:0;
+    width:100%;
+    height:220px;
+    pointer-events:none;
     z-index:-1;
-    animation:f 10s ease-in-out infinite;
+
+    background:
+        radial-gradient(ellipse at 10% 100%, rgba(0,0,0,.35) 0 30px, transparent 31px),
+        radial-gradient(ellipse at 25% 100%, rgba(0,0,0,.25) 0 40px, transparent 41px),
+        radial-gradient(ellipse at 45% 100%, rgba(0,0,0,.3) 0 35px, transparent 36px),
+        radial-gradient(ellipse at 65% 100%, rgba(0,0,0,.28) 0 45px, transparent 46px),
+        radial-gradient(ellipse at 85% 100%, rgba(0,0,0,.22) 0 38px, transparent 39px);
+
+    opacity:.6;
+    animation:sway 6s ease-in-out infinite alternate;
 }
 
-.b1{
-    width:280px;
-    height:280px;
-    background:#0ea5e9;
-    top:-60px;
-    left:-60px;
+@keyframes sway{
+    from{transform:skewX(-2deg) translateX(-5px);}
+    to{transform:skewX(2deg) translateX(5px);}
 }
 
-.b2{
-    width:340px;
-    height:340px;
-    background:#06b6d4;
-    right:-120px;
-    top:30%;
-    animation-delay:-3s;
+/* fish */
+.fish-layer{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:-1;
+    overflow:hidden;
 }
 
-.b3{
-    width:260px;
-    height:260px;
-    background:#14b8a6;
-    bottom:-70px;
-    left:25%;
-    animation-delay:-6s;
+.fish-layer span{
+    position:absolute;
+    width:60px;
+    height:30px;
+
+    background:rgba(0,0,0,.18);
+    border-radius:60% 40% 60% 40%;
+
+    opacity:.5;
+    transition:transform .15s ease-out;
 }
 
-@keyframes f{
-    0%,100%{transform:translateY(0)}
-    50%{transform:translateY(-25px)}
+/* tail */
+.fish-layer span::after{
+    content:"";
+    position:absolute;
+    right:-12px;
+    top:50%;
+    transform:translateY(-50%);
+    border-left:12px solid rgba(0,0,0,.18);
+    border-top:8px solid transparent;
+    border-bottom:8px solid transparent;
 }
 
+/* drift */
+.fish-layer span:nth-child(1){top:20%;left:10%; animation:drift1 18s linear infinite;}
+.fish-layer span:nth-child(2){top:40%;left:20%; animation:drift2 24s linear infinite;}
+.fish-layer span:nth-child(3){top:65%;left:5%; animation:drift3 20s linear infinite;}
+.fish-layer span:nth-child(4){top:80%;left:15%; animation:drift4 28s linear infinite;}
+
+@keyframes drift1{0%{transform:translateX(-20vw);}100%{transform:translateX(120vw);}}
+@keyframes drift2{0%{transform:translateX(-30vw);}100%{transform:translateX(130vw);}}
+@keyframes drift3{0%{transform:translateX(-25vw);}100%{transform:translateX(125vw);}}
+@keyframes drift4{0%{transform:translateX(-35vw);}100%{transform:translateX(135vw);}}
+
+/* card */
 .card{
-    min-width:380px;
+    min-width:420px;
+    padding:50px;
+    border-radius:32px;
+
+    background:rgba(255,255,255,.08);
+    backdrop-filter:blur(25px);
+
+    border:1px solid rgba(255,255,255,.2);
+    box-shadow:0 25px 60px rgba(0,0,0,.35);
+
     text-align:center;
-    padding:45px;
-    border-radius:30px;
-    background:var(--card);
-    backdrop-filter:blur(20px);
-    border:1px solid rgba(255,255,255,.15);
-    box-shadow:
-        0 0 50px rgba(0,198,255,.25),
-        inset 0 0 30px rgba(255,255,255,.08);
+}
+
+h1{
+    margin:0 0 20px;
+    font-size:32px;
+
+    background:linear-gradient(90deg,#fff,#67e8f9,#22d3ee);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
 }
 
 #money{
-    font-size:82px;
+    font-size:90px;
     font-weight:900;
     margin-bottom:30px;
-    background:linear-gradient(#fff,#8ef9ff);
+
+    background:linear-gradient(#fff,#a5f3fc);
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
-    text-shadow:
-        0 0 15px rgba(0,255,213,.6),
-        0 0 35px rgba(0,198,255,.5);
 }
 
 button{
     border:none;
-    color:white;
     cursor:pointer;
-    font-size:22px;
+    padding:14px 30px;
+    font-size:24px;
     font-weight:800;
-    padding:14px 28px;
-    border-radius:14px;
-    margin:8px;
-    background:linear-gradient(135deg,#00c6ff,#0072ff);
-    transition:.2s;
-    box-shadow:0 8px 20px rgba(0,198,255,.35);
-}
+    border-radius:16px;
 
-button:hover{
-    transform:translateY(-3px);
+    background:linear-gradient(135deg,#06b6d4,#0ea5e9);
+    color:white;
 }
 
 #warning{
@@ -121,7 +201,6 @@ button:hover{
     justify-content:center;
     align-items:center;
     background:rgba(0,0,0,.6);
-    backdrop-filter:blur(8px);
     color:#ff8080;
     font-size:48px;
     font-weight:900;
@@ -135,124 +214,109 @@ button:hover{
     width:24px;
     height:24px;
     opacity:0;
-    background:transparent;
-    border:none;
 }
 </style>
 </head>
+
 <body>
 
-<div class="blob b1"></div>
-<div class="blob b2"></div>
-<div class="blob b3"></div>
+<div class="bubbles">
+  <span></span><span></span><span></span>
+  <span></span><span></span><span></span>
+</div>
+
+<div class="seaweed"></div>
+
+<div class="fish-layer">
+  <span></span><span></span><span></span><span></span>
+</div>
 
 <div class="card">
+    <h1>Ocean Bank</h1>
     <div id="money">$0</div>
 
     <button id="plus">+</button>
     <button id="minus">−</button>
 </div>
 
-<button id="unlock" aria-label="unlock"></button>
-
+<button id="unlock"></button>
 <div id="warning">LOCKED</div>
 
 <script>
 (()=>{
-
-const PASSWORD_HINT="68-85-67-75"; // DUCK (decoy)
-
-const _0=[71,73,84];
-const _1=[72,85,66];
-const _2=[73,83,72];
-const _3=[65,82,68];
-
-const _4=[..._0,..._1,..._2,..._3]
-.map(v=>String.fromCharCode(v))
-.join("");
-
-const _$=s=>(s||"").toLowerCase()===_4.toLowerCase();
 
 const m=document.getElementById("money");
 const w=document.getElementById("warning");
 
 let n=parseInt(localStorage.getItem("money"))||0;
 let u=false;
-let t=null;
 
 const sv=()=>localStorage.setItem("money",n);
-
-const rn=()=>{
-    m.textContent="$"+n;
-};
+const rn=()=>m.textContent="$"+n;
 
 const lk=()=>{
     w.style.display="flex";
     setTimeout(()=>w.style.display="none",1000);
 };
 
-const fu=()=>parseInt(localStorage.getItem("failures")||"0");
-
-const lu=()=>parseInt(localStorage.getItem("lockUntil")||"0");
-
-const lo=()=>Date.now()<lu();
-
-const rs=()=>Math.ceil((lu()-Date.now())/1000);
-
 document.getElementById("unlock").onclick=()=>{
-
-    if(lo()){
-        alert("Try again in "+rs()+" seconds.");
-        return;
-    }
 
     const p=prompt("Password:");
 
-    if(_$(p)){
-
+    if((p||"").toLowerCase()==="githubishard"){
         u=true;
-
-        localStorage.setItem("failures","0");
-
-        if(t)clearTimeout(t);
-
-        t=setTimeout(()=>{
-            u=false;
-        },10000);
-
+        setTimeout(()=>u=false,10000);
         alert("Unlocked for 10 seconds");
-        return;
+    }else{
+        alert("Incorrect password");
     }
-
-    const f=fu()+1;
-
-    localStorage.setItem("failures",f);
-
-    localStorage.setItem(
-        "lockUntil",
-        Date.now()+f*60000
-    );
-
-    alert(
-        "Incorrect password. Locked for "+
-        f+
-        " minute(s)."
-    );
 };
 
+/* counter */
 document.getElementById("plus").onclick=()=>{
     if(!u){lk();return;}
-    n++;
-    sv();
-    rn();
+    n++;sv();rn();
 };
 
 document.getElementById("minus").onclick=()=>{
     if(!u){lk();return;}
-    n--;
-    sv();
-    rn();
+    n--;sv();rn();
 };
+
+/* fish mouse reaction */
+const fish=document.querySelectorAll(".fish-layer span");
+let mouse={x:innerWidth/2,y:innerHeight/2};
+
+window.addEventListener("mousemove",e=>{
+    mouse.x=e.clientX;
+    mouse.y=e.clientY;
+});
+
+function animateFish(){
+    fish.forEach(f=>{
+        const r=f.getBoundingClientRect();
+        const fx=r.left+r.width/2;
+        const fy=r.top+r.height/2;
+
+        const dx=fx-mouse.x;
+        const dy=fy-mouse.y;
+
+        const dist=Math.sqrt(dx*dx+dy*dy);
+
+        let power=0;
+        if(dist<180) power=(180-dist)/180;
+
+        const angle=Math.atan2(dy,dx);
+
+        const x=Math.cos(angle)*power*40;
+        const y=Math.sin(angle)*power*40;
+
+        f.style.transform=`translate(${x}px,${y}px)`;
+    });
+
+    requestAnimationFrame(animateFish);
+}
+animateFish();
 
 rn();
 
