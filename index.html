@@ -123,26 +123,35 @@ button{
     color:white;
 }
 
-/* NEW: unlock button */
+/* unlock button fully invisible */
 #unlockBtn{
     position:fixed;
     top:20px;
     right:20px;
     background:transparent;
-    border:1px solid rgba(255,255,255,.25);
-    color:rgba(255,255,255,.6);
+    border:none;
+    opacity:0;
     font-size:18px;
     padding:10px 12px;
     border-radius:12px;
     cursor:pointer;
-    backdrop-filter: blur(10px);
-    transition:.2s;
 }
 
-#unlockBtn:hover{
+/* LOCKED SCREEN */
+#lockedScreen{
+    position:fixed;
+    inset:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:rgba(0,0,0,.85);
     color:white;
-    border-color:rgba(255,255,255,.6);
-    transform:scale(1.05);
+    font-size:40px;
+    font-weight:900;
+    z-index:9999;
+    opacity:0;
+    pointer-events:none;
+    transition:.2s;
 }
 </style>
 </head>
@@ -150,6 +159,8 @@ button{
 <body>
 
 <button id="unlockBtn">🔓</button>
+
+<div id="lockedScreen">LOCKED</div>
 
 <div class="bubbles">
   <span></span><span></span><span></span>
@@ -172,22 +183,45 @@ button{
 const fishLayer = document.querySelector(".fish-layer");
 const fishCount = 10;
 const fishArray = [];
-const mouse = {x: innerWidth/2, y: innerHeight/2};
+
+const lockedScreen = document.getElementById("lockedScreen");
 
 /* ---------------- MONEY ---------------- */
 const m = document.getElementById("money");
 let n = parseInt(localStorage.getItem("money")) || 0;
 let u = false;
-let lockUntil = parseInt(localStorage.getItem("lockUntil")) || 0;
 
 const sv = () => localStorage.setItem("money", n);
 const rn = () => m.textContent = "$" + n;
 
+/* ---------------- LOCKOUT SYSTEM ---------------- */
+let failCount = parseInt(localStorage.getItem("failCount")) || 0;
+let lockUntil = parseInt(localStorage.getItem("lockUntil")) || 0;
+
 const isLockedOut = () => Date.now() < lockUntil;
 
-const lk = () => {
-    alert("LOCKED");
+const showLockedScreen = () => {
+    lockedScreen.style.opacity = "1";
+    lockedScreen.style.pointerEvents = "all";
+    setTimeout(() => {
+        lockedScreen.style.opacity = "0";
+        lockedScreen.style.pointerEvents = "none";
+    }, 1000);
 };
+
+const applyLockout = () => {
+    failCount++;
+    localStorage.setItem("failCount", failCount);
+
+    const duration = failCount * 10000;
+    lockUntil = Date.now() + duration;
+    localStorage.setItem("lockUntil", lockUntil);
+};
+
+/* ---------------- NEW: PERSISTENT LOCK SCREEN ON REFRESH ---------------- */
+if (isLockedOut()) {
+    showLockedScreen();
+}
 
 /* ---------------- FISH SPAWN ---------------- */
 function createFish(){
@@ -243,12 +277,12 @@ animateFish();
 
 /* ---------------- UI ---------------- */
 document.getElementById("plus").onclick = () => {
-    if(!u){lk();return;}
+    if(!u){return;}
     n++; sv(); rn();
 };
 
 document.getElementById("minus").onclick = () => {
-    if(!u){lk();return;}
+    if(!u){return;}
     n--; sv(); rn();
 };
 
@@ -261,20 +295,9 @@ document.getElementById("unlockBtn").onclick = () => {
 
     const p = prompt("Password:");
 
-    const DUCK = "DUCK";
-    const GOOSE = "GOOSE";
-    const ADMIN = "ADMIN";
-
-    if(p === DUCK){
-        console.log("unlock=true (decoy DUCK route)");
-    }
-
-    if(p === GOOSE){
-        console.log("unlock=true (decoy GOOSE route)");
-    }
-
-    if(p === ADMIN){
-        console.log("unlock=true (decoy ADMIN route)");
+    if(isLockedOut()){
+        alert("LOCKED OUT");
+        return;
     }
 
     if((p || "") === password){
@@ -282,9 +305,9 @@ document.getElementById("unlockBtn").onclick = () => {
         setTimeout(()=> u = false, 10000);
         alert("Unlocked for 10 seconds");
     } else {
-        lockUntil = Date.now() + 10000;
-        localStorage.setItem("lockUntil", lockUntil);
-        alert("Incorrect password (+10s lockout)");
+        showLockedScreen();
+        applyLockout();
+        alert(`Incorrect password (+${failCount * 10}s lockout)`);
     }
 };
 
