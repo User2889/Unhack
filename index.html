@@ -5,37 +5,134 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Bank</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{
-  height:100vh; display:flex; justify-content:center; align-items:center; overflow:hidden;
-  user-select:none; font-family:"Segoe UI",Arial,sans-serif; color:#e8fcff;
-  background: radial-gradient(circle at top,#38bdf8 0%,transparent 30%),
-              linear-gradient(to bottom,#0ea5e9,#082f49);
+/* Reset and basic styling */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  user-select: none;
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: #e8fcff;
+  background: radial-gradient(circle at top, #38bdf8 0%, transparent 30%),
+              linear-gradient(to bottom, #0ea5e9, #082f49);
 }
-.bubbles, .fish-layer{position:fixed;inset:0;pointer-events:none;z-index:-2;}
-.bubbles span{position:absolute;bottom:-100px;border-radius:50%;background:rgba(255,255,255,.15);animation:bubble linear infinite;}
-.bubbles span:nth-child(1){left:10%;width:40px;height:40px;animation-duration:12s;}
-.bubbles span:nth-child(2){left:25%;width:20px;height:20px;animation-duration:8s;}
-.bubbles span:nth-child(3){left:45%;width:60px;height:60px;animation-duration:16s;}
-.bubbles span:nth-child(4){left:65%;width:25px;height:25px;animation-duration:9s;}
-.bubbles span:nth-child(5){left:80%;width:45px;height:45px;animation-duration:14s;}
-.bubbles span:nth-child(6){left:90%;width:30px;height:30px;animation-duration:11s;}
-@keyframes bubble{from{transform:translateY(0);opacity:0;}20%{opacity:1;}to{transform:translateY(-120vh);opacity:0;}}
-.fish{position:absolute;width:60px;height:30px;background:rgba(0,0,0,.18);border-radius:60% 40% 60% 40%;opacity:.5;}
-.fish::after{content:"";position:absolute;right:-12px;top:50%;transform:translateY(-50%);border-left:12px solid rgba(0,0,0,.18);border-top:8px solid transparent;border-bottom:8px solid transparent;}
-.card{
-  min-width:420px;padding:50px;border-radius:32px;background:rgba(255,255,255,.08);backdrop-filter:blur(25px);
-  border:1px solid rgba(255,255,255,.2);box-shadow:0 25px 60px rgba(0,0,0,.35);text-align:center;
+
+/* Bubbles */
+.bubbles, .fish-layer { position: fixed; inset: 0; pointer-events: none; z-index: -2; }
+.bubbles span {
+  position: absolute;
+  bottom: -100px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.15);
+  animation: bubble linear infinite;
 }
-h1{margin-bottom:20px;font-size:32px;background:linear-gradient(90deg,#fff,#67e8f9,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-#money{font-size:90px;font-weight:900;margin-bottom:30px;background:linear-gradient(#fff,#a5f3fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-button{border:none;cursor:pointer;padding:14px 30px;font-size:24px;font-weight:800;border-radius:16px;background:linear-gradient(135deg,#06b6d4,#0ea5e9);color:white;}
-#unlockBtn{position:fixed;top:20px;right:20px;background:transparent;border:none;opacity:0;font-size:18px;padding:10px 12px;border-radius:12px;cursor:pointer;}
-#lockedScreen{position:fixed;inset:0;display:flex;justify-content:center;align-items:center;background:rgba(0,0,0,.85);color:white;font-size:40px;font-weight:900;z-index:9999;opacity:0;pointer-events:none;transition:.2s;}
+.bubbles span:nth-child(1){ left:10%; width:40px; height:40px; animation-duration:12s; }
+.bubbles span:nth-child(2){ left:25%; width:20px; height:20px; animation-duration:8s; }
+.bubbles span:nth-child(3){ left:45%; width:60px; height:60px; animation-duration:16s; }
+.bubbles span:nth-child(4){ left:65%; width:25px; height:25px; animation-duration:9s; }
+.bubbles span:nth-child(5){ left:80%; width:45px; height:45px; animation-duration:14s; }
+.bubbles span:nth-child(6){ left:90%; width:30px; height:30px; animation-duration:11s; }
+@keyframes bubble { 
+  from { transform: translateY(0); opacity:0; }
+  20% { opacity:1; }
+  to { transform: translateY(-120vh); opacity:0; }
+}
+
+/* Fish */
+.fish {
+  position: absolute;
+  width: 60px;
+  height: 30px;
+  background: rgba(0,0,0,.18);
+  border-radius: 60% 40% 60% 40%;
+  opacity: .5;
+}
+.fish::after {
+  content: "";
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-left: 12px solid rgba(0,0,0,.18);
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+}
+
+/* Card */
+.card {
+  min-width: 420px;
+  padding: 50px;
+  border-radius: 32px;
+  background: rgba(255,255,255,.08);
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(255,255,255,.2);
+  box-shadow: 0 25px 60px rgba(0,0,0,.35);
+  text-align: center;
+}
+h1 {
+  margin-bottom: 20px;
+  font-size: 32px;
+  background: linear-gradient(90deg, #fff, #67e8f9, #22d3ee);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+#money {
+  font-size: 90px;
+  font-weight: 900;
+  margin-bottom: 30px;
+  background: linear-gradient(#fff, #a5f3fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Buttons */
+button {
+  border: none;
+  cursor: pointer;
+  padding: 14px 30px;
+  font-size: 24px;
+  font-weight: 800;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #06b6d4, #0ea5e9);
+  color: white;
+}
+#unlockBtn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: transparent;
+  border: none;
+  opacity: 0;
+  font-size: 18px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+/* Locked overlay */
+#lockedScreen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,.85);
+  color: white;
+  font-size: 40px;
+  font-weight: 900;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: .2s;
+}
 </style>
 </head>
 <body>
 
+<!-- Audio -->
 <audio id="bgm" loop autoplay>
   <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_115b9b6c2b.mp3" type="audio/mpeg">
 </audio>
@@ -43,14 +140,17 @@ button{border:none;cursor:pointer;padding:14px 30px;font-size:24px;font-weight:8
   <source src="https://cdn.pixabay.com/audio/2021/08/04/audio_9c1c1d2f5b.mp3" type="audio/mpeg">
 </audio>
 
+<!-- Unlock button and locked overlay -->
 <button id="unlockBtn">🔓</button>
 <div id="lockedScreen">LOCKED</div>
 
+<!-- Background bubbles and fish -->
 <div class="bubbles">
   <span></span><span></span><span></span><span></span><span></span><span></span>
 </div>
 <div class="fish-layer"></div>
 
+<!-- Bank card -->
 <div class="card">
   <h1>Bank</h1>
   <div id="money">$0</div>
@@ -60,53 +160,104 @@ button{border:none;cursor:pointer;padding:14px 30px;font-size:24px;font-weight:8
 
 <script>
 (() => {
-const moneyEl = document.getElementById("money"),
-      plus = document.getElementById("plus"),
-      minus = document.getElementById("minus"),
-      unlockBtn = document.getElementById("unlockBtn"),
-      clickSound = document.getElementById("clickSound"),
-      lockedScreen = document.getElementById("lockedScreen"),
-      fishLayer = document.querySelector(".fish-layer");
+  const moneyEl = document.getElementById("money"),
+        plus = document.getElementById("plus"),
+        minus = document.getElementById("minus"),
+        unlockBtn = document.getElementById("unlockBtn"),
+        clickSound = document.getElementById("clickSound"),
+        lockedScreen = document.getElementById("lockedScreen"),
+        fishLayer = document.querySelector(".fish-layer");
 
-clickSound.volume = 0.4;
+  clickSound.volume = 0.4;
 
-let n = parseInt(localStorage.money)||0,
-    u = false,
-    failCount = parseInt(localStorage.failCount)||0,
-    lockUntil = parseInt(localStorage.lockUntil)||0;
+  let n = parseInt(localStorage.money) || 0,
+      u = false,
+      failCount = parseInt(localStorage.failCount) || 0,
+      lockUntil = parseInt(localStorage.lockUntil) || 0;
 
-const sv = ()=>localStorage.money=n,
-      rn = ()=>moneyEl.textContent=`$${n}`,
-      isLockedOut = ()=>Date.now()<lockUntil,
-      showLockedScreen=()=>{lockedScreen.style.opacity="1";lockedScreen.style.pointerEvents="all";},
-      applyLockout=()=>{localStorage.failCount=++failCount; localStorage.lockUntil=lockUntil=Date.now()+failCount*10000; showLockedScreen();};
+  const sv = () => localStorage.money = n,
+        rn = () => moneyEl.textContent = `$${n}`,
+        isLockedOut = () => Date.now() < lockUntil,
+        showLockedScreen = () => {
+          lockedScreen.style.opacity = "1";
+          lockedScreen.style.pointerEvents = "all";
+        },
+        hideLockedScreen = () => {
+          lockedScreen.style.opacity = "0";
+          lockedScreen.style.pointerEvents = "none";
+        },
+        applyLockout = () => {
+          localStorage.failCount = ++failCount;
+          localStorage.lockUntil = lockUntil = Date.now() + failCount * 10000;
+          showLockedScreen();
+        };
 
-// Fish animation
-const fishArray=[];
-function createFish(){const f=document.createElement("div");f.className="fish";resetFish(f);fishLayer.appendChild(f);fishArray.push(f);}
-function resetFish(f){const fromLeft=Math.random()>0.5; f.style.top=Math.random()*innerHeight+"px"; f.style.left=fromLeft?"-80px":innerWidth+"px"; f.dataset.speed=1+Math.random()*2; f.dataset.dir=fromLeft?1:-1;}
-for(let i=0;i<10;i++) createFish();
-function animateFish(){fishArray.forEach(f=>{let x=parseFloat(f.style.left),dir=parseFloat(f.dataset.dir),speed=parseFloat(f.dataset.speed); x+=dir*speed; f.style.left=x+"px"; if(x>innerWidth+100||x<-120) resetFish(f);}); requestAnimationFrame(animateFish);}
-animateFish();
+  // Animate fish
+  const fishArray = [];
+  function createFish() {
+    const f = document.createElement("div");
+    f.className = "fish";
+    resetFish(f);
+    fishLayer.appendChild(f);
+    fishArray.push(f);
+  }
+  function resetFish(f) {
+    const fromLeft = Math.random() > 0.5;
+    f.style.top = Math.random() * innerHeight + "px";
+    f.style.left = fromLeft ? "-80px" : innerWidth + "px";
+    f.dataset.speed = 1 + Math.random() * 2;
+    f.dataset.dir = fromLeft ? 1 : -1;
+  }
+  for(let i=0;i<10;i++) createFish();
+  function animateFish() {
+    fishArray.forEach(f => {
+      let x = parseFloat(f.style.left),
+          dir = parseFloat(f.dataset.dir),
+          speed = parseFloat(f.dataset.speed);
+      x += dir * speed;
+      f.style.left = x + "px";
+      if(x > innerWidth + 100 || x < -120) resetFish(f);
+    });
+    requestAnimationFrame(animateFish);
+  }
+  animateFish();
 
-// Buttons
-const changeMoney=d=>{if(isLockedOut()||!u)return; clickSound.currentTime=0; clickSound.play(); n+=d; sv(); rn();}
-plus.onclick=()=>changeMoney(1);
-minus.onclick=()=>changeMoney(-1);
+  // Change money
+  const changeMoney = d => {
+    if(isLockedOut() || !u) return;
+    clickSound.currentTime = 0;
+    clickSound.play();
+    n = Math.max(0, n + d); // prevent negative balance
+    sv();
+    rn();
+  };
+  plus.onclick = () => changeMoney(1);
+  minus.onclick = () => changeMoney(-1);
 
-// Unlock button
-unlockBtn.onclick=()=>{
-  if(isLockedOut()){showLockedScreen();return alert("LOCKED OUT");}
-  if(prompt("Password:")==="dysonvacuum6969"){
-    u=true; setTimeout(()=>u=false,10000);
-    failCount=lockUntil=0;
-    localStorage.failCount=0; localStorage.lockUntil=0;
-    alert("Unlocked for 10 seconds");
-  } else { applyLockout(); alert(`Incorrect password (+${failCount*10}s lockout)`);}
-};
+  // Unlock button
+  unlockBtn.onclick = () => {
+    if(isLockedOut()) { showLockedScreen(); return alert("LOCKED OUT"); }
+    if(prompt("Password:") === "dysonvacuum6969") {
+      u = true;
+      setTimeout(() => u = false, 10000);
+      failCount = lockUntil = 0;
+      localStorage.failCount = 0;
+      localStorage.lockUntil = 0;
+      alert("Unlocked for 10 seconds");
+    } else {
+      applyLockout();
+      alert(`Incorrect password (+${failCount*10}s lockout)`);
+    }
+  };
 
-if(isLockedOut()) showLockedScreen();
-rn();
+  // Hide locked screen when lockout expires
+  setInterval(() => {
+    if(!isLockedOut()) hideLockedScreen();
+  }, 500);
+
+  // Initialize
+  if(isLockedOut()) showLockedScreen();
+  rn();
 })();
 </script>
 
