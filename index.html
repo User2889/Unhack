@@ -3,199 +3,256 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Space Vault Clicker</title>
+<title>Space Vault</title>
 
 <style>
-    body {
-        margin: 0;
-        overflow: hidden;
-        font-family: Arial, sans-serif;
-        color: white;
-        background: radial-gradient(circle at bottom, #050816, #000);
-    }
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap');
 
-    /* stars */
-    .stars, .stars2, .stars3 {
-        position: absolute;
-        width: 200%;
-        height: 200%;
-        background-repeat: repeat;
-        background-image: radial-gradient(white 1px, transparent 1px);
-        background-size: 50px 50px;
-        animation: moveStars 60s linear infinite;
-        opacity: 0.3;
-    }
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: 'Orbitron', sans-serif;
+    background: #000;
+    color: white;
+}
 
-    .stars2 { animation-duration: 120s; opacity: 0.2; transform: scale(1.5); }
-    .stars3 { animation-duration: 180s; opacity: 0.1; transform: scale(2); }
+/* SPACE BACKGROUND */
+.space {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at 20% 30%, #1a1f3c, transparent 40%),
+                radial-gradient(circle at 80% 70%, #2b0f3a, transparent 45%),
+                radial-gradient(circle at center, #050816, #000);
+}
 
-    @keyframes moveStars {
-        from { transform: translateY(0px); }
-        to { transform: translateY(-1000px); }
-    }
+/* STARS */
+.star {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff, transparent);
+    animation: floatStar linear infinite;
+    opacity: 0.5;
+}
 
-    .center {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: center;
-    }
+@keyframes floatStar {
+    from { transform: translateY(0); opacity: 0.3; }
+    to { transform: translateY(-120vh); opacity: 0.8; }
+}
 
-    button {
-        padding: 15px 25px;
-        font-size: 18px;
-        margin: 10px;
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-    }
+/* HUD */
+.hud {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    padding: 45px;
+    border-radius: 22px;
+    background: rgba(10, 15, 30, 0.55);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 0 60px rgba(180, 200, 255, 0.15);
+}
 
-    .plus { background: #00ff99; color: black; }
-    .minus { background: #ff4d4d; color: black; }
+/* MONEY */
+#money {
+    font-size: 64px;
+    margin-bottom: 25px;
+    text-shadow: 0 0 25px rgba(180, 220, 255, 0.9);
+}
 
-    #money {
-        font-size: 40px;
-        margin-bottom: 20px;
-    }
+/* PASTEL SPACE BUTTONS */
+.btn {
+    padding: 14px 30px;
+    margin: 10px;
+    font-size: 18px;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s ease;
+    font-family: 'Orbitron', sans-serif;
+}
 
-    /* invisible unlock button */
-    #unlockBtn {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        width: 60px;
-        height: 60px;
-        opacity: 0;
-        cursor: pointer;
-    }
+.plus {
+    background: linear-gradient(135deg, #ffd6ff, #caffbf);
+    box-shadow: 0 0 25px rgba(255, 214, 255, 0.5),
+                0 0 45px rgba(202, 255, 191, 0.4);
+}
 
-    /* lock screen */
-    #lockScreen {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.9);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        font-size: 24px;
-        z-index: 999;
-    }
+.minus {
+    background: linear-gradient(135deg, #a0c4ff, #bdb2ff);
+    box-shadow: 0 0 25px rgba(160, 196, 255, 0.5),
+                0 0 45px rgba(189, 178, 255, 0.4);
+}
+
+.btn:hover {
+    transform: scale(1.1);
+    filter: brightness(1.2);
+}
+
+/* LOCK SCREEN */
+#lockScreen {
+    position: fixed;
+    inset: 0;
+    background: rgba(139,0,0,0.95);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 600;
+    z-index: 999;
+    text-align: center;
+    color: white;
+}
+
+/* SPARKLES */
+.sparkle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: radial-gradient(circle, white, transparent);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: sparkle 0.8s ease-out forwards;
+}
+
+@keyframes sparkle {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(3); opacity: 0; }
+}
+
+/* HIDDEN UNLOCK BUTTON */
+#unlockBtn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 60px;
+    height: 60px;
+    opacity: 0;
+}
+
+audio { display:none; }
 </style>
 </head>
 
 <body>
-
-<div class="stars"></div>
-<div class="stars2"></div>
-<div class="stars3"></div>
-
-<!-- hidden unlock button -->
+<div class="space" id="space"></div>
 <div id="unlockBtn"></div>
 
-<div class="center">
+<div class="hud">
     <div id="money">$0</div>
-    <button class="plus" onclick="changeMoney(1)">+1</button>
-    <button class="minus" onclick="changeMoney(-1)">-1</button>
+    <button class="btn plus" onclick="changeMoney(1)">+1</button>
+    <button class="btn minus" onclick="changeMoney(-1)">-1</button>
 </div>
 
 <div id="lockScreen">
-    <div id="lockText">Locked</div>
+    <div id="lockText">ACCESS DENIED</div>
 </div>
 
-<!-- SPACE AMBIENT MUSIC -->
 <audio id="bgMusic" loop>
-    <source src="https://cdn.pixabay.com/audio/2022/10/16/audio_12b6b1d3c2.mp3" type="audio/mpeg">
+    <source src="https://cdn.pixabay.com/audio/2022/10/16/audio_12b6b1d3c2.mp3">
 </audio>
 
 <script>
-let money = parseInt(localStorage.getItem("money")) || 0;
+let money = +localStorage.getItem("money") || 0;
 let unlocked = localStorage.getItem("unlocked") === "true";
-let lockEnd = parseInt(localStorage.getItem("lockEnd")) || 0;
-let wrongStreak = parseInt(localStorage.getItem("wrongStreak")) || 0;
+let lockEnd = +localStorage.getItem("lockEnd") || 0;
+let wrongStreak = +localStorage.getItem("wrongStreak") || 0;
 
 const moneyEl = document.getElementById("money");
 const lockScreen = document.getElementById("lockScreen");
 const music = document.getElementById("bgMusic");
 
-function updateMoney() {
+function updateMoney(){
     moneyEl.textContent = "$" + money;
     localStorage.setItem("money", money);
 }
 
-function isLocked() {
+function isLocked(){
     return Date.now() < lockEnd;
 }
 
-function startLock(seconds) {
-    lockEnd = Date.now() + seconds * 1000;
+function startLock(sec){
+    lockEnd = Date.now() + sec*1000;
     localStorage.setItem("lockEnd", lockEnd);
+
     lockScreen.style.display = "flex";
 
-    const interval = setInterval(() => {
-        let remaining = Math.max(0, lockEnd - Date.now());
+    const t = setInterval(()=>{
+        let r = Math.max(0, lockEnd - Date.now());
         document.getElementById("lockText").textContent =
-            "Locked for " + Math.ceil(remaining / 1000) + "s";
+        "ACCESS DENIED — " + Math.ceil(r/1000) + "s";
 
-        if (remaining <= 0) {
-            clearInterval(interval);
-            lockScreen.style.display = "none";
+        if(r<=0){
+            clearInterval(t);
+            lockScreen.style.display="none";
         }
-    }, 500);
+    },200);
 }
 
-// start music after first interaction (browser requirement)
-function startMusic() {
-    music.volume = 0.4;
-    music.play().catch(() => {});
-    window.removeEventListener("click", startMusic);
-}
-window.addEventListener("click", startMusic);
-
-function changeMoney(val) {
-    if (!unlocked) {
-        alert("You need to unlock first!");
-        return;
-    }
-
-    if (isLocked()) return;
-
-    money += val;
+function changeMoney(v){
+    if(!unlocked) return alert("ACCESS DENIED");
+    if(isLocked()) return;
+    money += v;
     updateMoney();
 }
 
-// hidden unlock system
-document.getElementById("unlockBtn").addEventListener("click", () => {
-    if (isLocked()) return;
+document.getElementById("unlockBtn").addEventListener("click", ()=>{
+    if(isLocked()) return;
 
-    const input = prompt("Enter code:");
+    const code = prompt("Access Terminal:");
 
-    if (input === "dysonvacuum6969") {
+    if(code === "dysonvacuum6969"){
         unlocked = true;
-        localStorage.setItem("unlocked", "true");
+        localStorage.setItem("unlocked","true");
         wrongStreak = 0;
-        localStorage.setItem("wrongStreak", "0");
-        alert("Unlocked!");
+        localStorage.setItem("wrongStreak","0");
+        alert("ACCESS GRANTED");
     } else {
         wrongStreak++;
         localStorage.setItem("wrongStreak", wrongStreak);
-
-        let penalty = 10 + (wrongStreak - 1) * 10;
-        startLock(penalty);
+        startLock(10 + (wrongStreak-1)*10);
     }
 });
 
-// restore lock state
-if (isLocked()) {
-    startLock(Math.ceil((lockEnd - Date.now()) / 1000));
+/* STARS */
+const space = document.getElementById("space");
+
+for(let i=0;i<200;i++){
+    const s = document.createElement("div");
+    s.className = "star";
+    const size = Math.random()*2 + 1;
+    s.style.width = size + "px";
+    s.style.height = size + "px";
+    s.style.left = Math.random()*100 + "vw";
+    s.style.top = Math.random()*100 + "vh";
+    s.style.opacity = Math.random()*0.8 + 0.2;
+    s.style.animationDuration = (10 + Math.random()*20) + "s"; // slower
+    space.appendChild(s);
 }
 
+/* SPARKLES */
+window.addEventListener("click",(e)=>{
+    if(e.target.tagName==="BUTTON") return;
+
+    for(let i=0;i<6;i++){
+        const sp = document.createElement("div");
+        sp.className = "sparkle";
+        sp.style.left = e.clientX + (Math.random()*30-15)+"px";
+        sp.style.top = e.clientY + (Math.random()*30-15)+"px";
+        document.body.appendChild(sp);
+        setTimeout(()=>sp.remove(),800);
+    }
+});
+
+/* MUSIC */
+window.addEventListener("click", ()=>{
+    music.volume = 0.3;
+    music.play().catch(()=>{});
+},{once:true});
+
+/* INIT */
+if(isLocked()) startLock(Math.ceil((lockEnd-Date.now())/1000));
 updateMoney();
 </script>
-
 </body>
 </html>
