@@ -70,20 +70,15 @@ body{
 
 .plus{
     background:linear-gradient(135deg,#ffd6ff,#caffbf);
-    box-shadow:0 0 25px rgba(255,214,255,.5),
-                0 0 45px rgba(202,255,191,.4);
+    box-shadow:0 0 25px rgba(255,214,255,.5),0 0 45px rgba(202,255,191,.4);
 }
 
 .minus{
     background:linear-gradient(135deg,#a0c4ff,#bdb2ff);
-    box-shadow:0 0 25px rgba(160,196,255,.5),
-                0 0 45px rgba(189,178,255,.4);
+    box-shadow:0 0 25px rgba(160,196,255,.5),0 0 45px rgba(189,178,255,.4);
 }
 
-.btn:hover{
-    transform:scale(1.1);
-    filter:brightness(1.2);
-}
+.btn:hover{ transform:scale(1.1); filter:brightness(1.2); }
 
 #lockScreen{
     position:fixed;
@@ -96,7 +91,6 @@ body{
     font-weight:600;
     z-index:999;
     text-align:center;
-    color:white;
 }
 
 .sparkle{
@@ -142,9 +136,8 @@ audio{ display:none; }
     <div id="lockText">ACCESS DENIED</div>
 </div>
 
-<!-- SPACE AMBIENT MUSIC -->
-<audio id="bgMusic" loop preload="auto">
-    <source src="https://cdn.pixabay.com/download/audio/2023/06/01/audio_6fd6fc6e0b.mp3?filename=space-ambient-147193.mp3" type="audio/mpeg">
+<audio id="bgMusic" loop>
+    <source src="https://cdn.pixabay.com/audio/2022/10/16/audio_12b6b1d3c2.mp3">
 </audio>
 
 <script>
@@ -156,10 +149,11 @@ let wrongStreak = +localStorage.getItem("wrongStreak") || 0;
 const moneyEl = document.getElementById("money");
 const lockScreen = document.getElementById("lockScreen");
 const music = document.getElementById("bgMusic");
+const hud = document.querySelector(".hud");
 
-/* SOUND SYSTEM */
 let audioCtx;
 
+/* SOUND */
 function playSound(type){
     if(!audioCtx){
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -171,174 +165,98 @@ function playSound(type){
     osc.connect(gain);
     gain.connect(audioCtx.destination);
 
-    let freq = 300;
-    let duration = 0.12;
+    let freq = 300, duration = 0.12;
 
     switch(type){
-        case "click": freq = 300; duration = 0.06; break;
-        case "plus": freq = 650; duration = 0.15; break;
-        case "minus": freq = 180; duration = 0.15; break;
-        case "success": freq = 950; duration = 0.25; break;
-        case "error": freq = 110; duration = 0.3; break;
-        case "lock": freq = 70; duration = 0.4; break;
+        case "click": freq=300; duration=0.06; break;
+        case "plus": freq=650; break;
+        case "minus": freq=180; break;
+        case "success": freq=950; duration=0.25; break;
+        case "error": freq=110; duration=0.3; break;
+        case "lock": freq=70; duration=0.4; break;
+        case "sparkle": freq=1200; duration=0.05; break;
     }
 
-    osc.type = "sine";
     osc.frequency.value = freq;
+    osc.type = "sine";
 
-    gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
 
     osc.start();
     osc.stop(audioCtx.currentTime + duration);
 }
 
-/* MONEY */
-function updateMoney(){
-    moneyEl.textContent = "$" + money;
-    localStorage.setItem("money", money);
-}
-
-function isLocked(){
-    return Date.now() < lockEnd;
-}
-
-function startLock(sec){
-    lockEnd = Date.now() + sec * 1000;
-    localStorage.setItem("lockEnd", lockEnd);
-
-    lockScreen.style.display = "flex";
-    playSound("lock");
-
-    const t = setInterval(()=>{
-        const remaining = Math.max(0, lockEnd - Date.now());
-
-        document.getElementById("lockText").textContent =
-            "ACCESS DENIED — " + Math.ceil(remaining / 1000) + "s";
-
-        if(remaining <= 0){
-            clearInterval(t);
-            lockScreen.style.display = "none";
-        }
-    },200);
-}
-
-function changeMoney(v){
-    if(!unlocked){
-        playSound("error");
-        alert("Unlock first");
-        return;
-    }
-
-    if(isLocked()) return;
-
-    money += v;
-    updateMoney();
-
-    playSound(v > 0 ? "plus" : "minus");
-}
-
-/* UNLOCK */
-document.getElementById("unlockBtn")
-.addEventListener("click", ()=>{
-
-    if(isLocked()) return;
-
-    playSound("click");
-
-    const code = prompt("Access Terminal:");
-
-    if(code === "dysonvacuum6969"){
-
-        unlocked = true;
-        localStorage.setItem("unlocked", "true");
-
-        wrongStreak = 0;
-        localStorage.setItem("wrongStreak", "0");
-
-        playSound("success");
-        alert("ACCESS GRANTED");
-
-        setTimeout(()=>{
-            unlocked = false;
-            localStorage.setItem("unlocked", "false");
-        },10000);
-
-    }else{
-
-        wrongStreak++;
-        localStorage.setItem("wrongStreak", wrongStreak);
-
-        playSound("error");
-
-        startLock(10 + (wrongStreak - 1) * 10);
-    }
-
-});
-
-/* STARS */
-const space = document.getElementById("space");
-
-for(let i=0;i<200;i++){
-    const s = document.createElement("div");
-    s.className = "star";
-
-    const size = Math.random() * 2 + 1;
-
-    s.style.width = size + "px";
-    s.style.height = size + "px";
-    s.style.left = Math.random()*100 + "vw";
-    s.style.top = Math.random()*100 + "vh";
-    s.style.opacity = Math.random()*0.8 + 0.2;
-    s.style.animationDuration = (10 + Math.random()*20) + "s";
-
-    space.appendChild(s);
+/* HUD CHECK */
+function isOverHUD(x,y){
+    const r = hud.getBoundingClientRect();
+    return x>=r.left && x<=r.right && y>=r.top && y<=r.bottom;
 }
 
 /* SPARKLES */
-window.addEventListener("click", (e)=>{
-    if(e.target.tagName === "BUTTON") return;
+let last = 0;
+
+window.addEventListener("mousemove",(e)=>{
+    if(isOverHUD(e.clientX,e.clientY)) return;
+
+    const now = Date.now();
+    if(now - last < 20) return;
+    last = now;
+
+    for(let i=0;i<2;i++){
+        const sp = document.createElement("div");
+        sp.className="sparkle";
+
+        sp.style.left=(e.clientX+(Math.random()*20-10))+"px";
+        sp.style.top=(e.clientY+(Math.random()*20-10))+"px";
+
+        document.body.appendChild(sp);
+        setTimeout(()=>sp.remove(),800);
+    }
+
+    playSound("sparkle");
+});
+
+/* CLICK SPARKLES */
+window.addEventListener("click",(e)=>{
+    if(e.target.tagName==="BUTTON") return;
 
     playSound("click");
 
-    for(let i=0;i<6;i++){
-        const sp = document.createElement("div");
-        sp.className = "sparkle";
+    for(let i=0;i<4;i++){
+        const sp=document.createElement("div");
+        sp.className="sparkle";
 
-        sp.style.left = e.clientX + (Math.random()*30-15) + "px";
-        sp.style.top = e.clientY + (Math.random()*30-15) + "px";
+        sp.style.left=(e.clientX+(Math.random()*30-15))+"px";
+        sp.style.top=(e.clientY+(Math.random()*30-15))+"px";
 
         document.body.appendChild(sp);
         setTimeout(()=>sp.remove(),800);
     }
 });
 
-/* MUSIC FADE-IN */
-window.addEventListener("click", ()=>{
-    music.volume = 0;
+/* MUSIC */
+window.addEventListener("click",()=>{
+    music.volume=1;
     music.play().catch(()=>{});
+},{once:true});
 
-    let vol = 0;
+/* INIT STARS */
+const space=document.getElementById("space");
 
-    const fade = setInterval(()=>{
-        vol += 0.02;
+for(let i=0;i<200;i++){
+    const s=document.createElement("div");
+    s.className="star";
+    const size=Math.random()*2+1;
 
-        if(vol >= 0.45){
-            vol = 0.45;
-            clearInterval(fade);
-        }
+    s.style.width=size+"px";
+    s.style.height=size+"px";
+    s.style.left=Math.random()*100+"vw";
+    s.style.top=Math.random()*100+"vh";
+    s.style.animationDuration=(10+Math.random()*20)+"s";
 
-        music.volume = vol;
-    },100);
-
-},{ once:true });
-
-/* INIT */
-if(isLocked()){
-    startLock(Math.ceil((lockEnd - Date.now()) / 1000));
+    space.appendChild(s);
 }
-
-updateMoney();
 </script>
 
 </body>
