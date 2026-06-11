@@ -91,6 +91,18 @@ body{
     font-weight:600;
     z-index:999;
     text-align:center;
+    animation: none;
+}
+
+#lockScreen.active{
+    display:flex;
+    animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+    0%{opacity:0.6;}
+    50%{opacity:1;}
+    100%{opacity:0.6;}
 }
 
 .sparkle{
@@ -115,6 +127,7 @@ body{
     width:60px;
     height:60px;
     opacity:0;
+    z-index:1000;
 }
 
 audio{ display:none; }
@@ -142,18 +155,21 @@ audio{ display:none; }
 
 <script>
 let money = +localStorage.getItem("money") || 0;
-let unlocked = localStorage.getItem("unlocked") === "true";
-let lockEnd = +localStorage.getItem("lockEnd") || 0;
+let unlockedUntil = +localStorage.getItem("unlockedUntil") || 0;
+let lockUntil = +localStorage.getItem("lockUntil") || 0;
 let wrongStreak = +localStorage.getItem("wrongStreak") || 0;
+
+const CODE = "QUACKYduck";
 
 const moneyEl = document.getElementById("money");
 const lockScreen = document.getElementById("lockScreen");
 const music = document.getElementById("bgMusic");
 const hud = document.querySelector(".hud");
+const unlockBtn = document.getElementById("unlockBtn");
 
 let audioCtx;
 
-/* SOUND */
+/* SOUND (UNCHANGED LOGIC EXCEPT SAFE) */
 function playSound(type){
     if(!audioCtx){
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -174,107 +190,116 @@ function playSound(type){
         case "success": freq=950; duration=0.25; break;
         case "error": freq=110; duration=0.3; break;
         case "lock": freq=70; duration=0.4; break;
-        case "sparkle": 
-            duration = 0.2;
-            typeWave = "triangle";
-
-            // Create a short ascending chime
-            let freqs = [1200, 1350, 1500].map(f => f + Math.random()*50); 
+        case "sparkle":
+            let freqs = [1200, 1500, 1800].map(f => f + Math.random()*50);
             let startTime = audioCtx.currentTime;
             freqs.forEach((f, i)=>{
                 const o = audioCtx.createOscillator();
                 const g = audioCtx.createGain();
-                o.type = "triangle";
+                o.type = "sine";
                 o.frequency.value = f;
                 o.connect(g);
                 g.connect(audioCtx.destination);
-                g.gain.setValueAtTime(0.05, startTime + i*0.03);
-                g.gain.exponentialRampToValueAtTime(0.0001, startTime + i*0.03 + 0.15);
-                o.start(startTime + i*0.03);
-                o.stop(startTime + i*0.03 + 0.15);
+                g.gain.setValueAtTime(0.08, startTime + i*0.05);
+                g.gain.exponentialRampToValueAtTime(0.0001, startTime + i*0.05 + 0.25);
+                o.start(startTime + i*0.05);
+                o.stop(startTime + i*0.05 + 0.25);
             });
-            return; // stop normal single oscillator for sparkle
+            return;
     }
 
     osc.frequency.value = freq;
     osc.type = typeWave;
 
-    gain.gain.setValueAtTime(type === "sparkle" ? 0.08 : 0.15, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
 
     osc.start();
     osc.stop(audioCtx.currentTime + duration);
 }
 
-/* HUD CHECK */
-function isOverHUD(x,y){
-    const r = hud.getBoundingClientRect();
-    return x>=r.left && x<=r.right && y>=r.top && y<=r.bottom;
+/* LOCK HANDLER */
+function updateLock(){
+    const now = Date.now();
+
+    if(now < lockUntil){
+        lockScreen.classList.add("active");
+        document.getElementById("lockText").innerText = "ACCESS DENIED";
+        return true;
+    }
+
+    lockScreen.classList.remove("active");
+    return false;
 }
 
-/* SPARKLES */
-let last = 0;
-
-window.addEventListener("mousemove",(e)=>{
-    if(isOverHUD(e.clientX,e.clientY)) return;
-
+/* MONEY CHANGE */
+function changeMoney(amount){
     const now = Date.now();
-    if(now - last < 20) return;
-    last = now;
+
+    if(updateLock()) return;
+
+    if(now > unlockedUntil){
+        alert("Unlock first!");
+        playSound("error");
+        return;
+    }
+
+    money += amount;
+    moneyEl.textContent = `$${money}`;
+    localStorage.setItem("money",money);
+    playSound(amount>0 ? "plus" : "minus");
+}
+
+/* UNLOCK BUTTON */
+unlockBtn.addEventListener("click", ()=>{
+    if(updateLock()) return;
+
+    const code = prompt("ENTER CODE");
+
+    if(code === CODE){
+        wrongStreak = 0;
+        localStorage.setItem("wrongStreak", wrongStreak);
+
+        const duration = 10000;
+        unlockedUntil = Date.now() + duration;
+        localStorage.setItem("unlockedUntil", unlockedUntil);
+
+        playSound("success");
+    } else {
+        wrongStreak++;
+        localStorage.setItem("wrongStreak", wrongStreak);
+
+        const lockTime = wrongStreak * 10000;
+        lockUntil = Date.now() + lockTime;
+        localStorage.setItem("lockUntil", lockUntil);
+
+        document.getElementById("lockText").innerText = "ACCESS DENIED";
+        lockScreen.classList.add("active");
+
+        playSound("error");
+    }
+});
+
+/* INIT UI */
+moneyEl.textContent = `$${money}`;
+updateLock();
+
+/* SPARKLES */
+window.addEventListener("mousemove",(e)=>{
+    const now = Date.now();
+    if(now % 20 !== 0) return;
 
     for(let i=0;i<2;i++){
         const sp = document.createElement("div");
         sp.className="sparkle";
-
         sp.style.left=(e.clientX+(Math.random()*20-10))+"px";
         sp.style.top=(e.clientY+(Math.random()*20-10))+"px";
-
         document.body.appendChild(sp);
         setTimeout(()=>sp.remove(),800);
     }
 
     playSound("sparkle");
 });
-
-/* CLICK SPARKLES */
-window.addEventListener("click",(e)=>{
-    if(e.target.tagName==="BUTTON") return;
-
-    playSound("click");
-
-    for(let i=0;i<4;i++){
-        const sp=document.createElement("div");
-        sp.className="sparkle";
-
-        sp.style.left=(e.clientX+(Math.random()*30-15))+"px";
-        sp.style.top=(e.clientY+(Math.random()*30-15))+"px";
-
-        document.body.appendChild(sp);
-        setTimeout(()=>sp.remove(),800);
-    }
-});
-
-/* MUSIC */
-window.addEventListener("click",()=>{
-    music.volume=1;
-    music.play().catch(()=>{});
-},{once:true});
-
-/* INIT STARS */
-const space=document.getElementById("space");
-
-for(let i=0;i<200;i++){
-    const s=document.createElement("div");
-    s.className="star";
-    const size=Math.random()*2+1;
-
-    s.style.width=size+"px";
-    s.style.height=size+"px";
-    s.style.left=Math.random()*100+"vw";
-    s.style.top=Math.random()*100+"vh";
-    s.style.animationDuration=(10+Math.random()*20)+"s";
-
-    space.appendChild(s);
-}
-
-/*end*/
+</script>
+</body>
+</html>
