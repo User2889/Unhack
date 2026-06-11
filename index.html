@@ -169,10 +169,39 @@ const unlockBtn = document.getElementById("unlockBtn");
 
 let audioCtx;
 
-/* SOUND (UNCHANGED LOGIC EXCEPT SAFE) */
+/* sparkle control */
+let sparkleStart = 0;
+let sparkleArmed = true;
+let idleTimer;
+
+/* LOCK TIMER */
+let lockInterval;
+
+/* SOUND */
 function playSound(type){
     if(!audioCtx){
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    if(type === "sparkle"){
+        // sharper "clink" sound
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+
+        o.type = "square";
+        o.frequency.value = 2200 + Math.random()*800;
+
+        o.connect(g);
+        g.connect(audioCtx.destination);
+
+        const t = audioCtx.currentTime;
+
+        g.gain.setValueAtTime(0.12, t);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
+
+        o.start(t);
+        o.stop(t + 0.03);
+        return;
     }
 
     const osc = audioCtx.createOscillator();
@@ -190,22 +219,6 @@ function playSound(type){
         case "success": freq=950; duration=0.25; break;
         case "error": freq=110; duration=0.3; break;
         case "lock": freq=70; duration=0.4; break;
-        case "sparkle":
-            let freqs = [1200, 1500, 1800].map(f => f + Math.random()*50);
-            let startTime = audioCtx.currentTime;
-            freqs.forEach((f, i)=>{
-                const o = audioCtx.createOscillator();
-                const g = audioCtx.createGain();
-                o.type = "sine";
-                o.frequency.value = f;
-                o.connect(g);
-                g.connect(audioCtx.destination);
-                g.gain.setValueAtTime(0.08, startTime + i*0.05);
-                g.gain.exponentialRampToValueAtTime(0.0001, startTime + i*0.05 + 0.25);
-                o.start(startTime + i*0.05);
-                o.stop(startTime + i*0.05 + 0.25);
-            });
-            return;
     }
 
     osc.frequency.value = freq;
@@ -218,21 +231,32 @@ function playSound(type){
     osc.stop(audioCtx.currentTime + duration);
 }
 
-/* LOCK HANDLER */
+/* LOCK HANDLER WITH TIMER */
 function updateLock(){
     const now = Date.now();
 
     if(now < lockUntil){
+        const secs = Math.ceil((lockUntil - now)/1000);
         lockScreen.classList.add("active");
-        document.getElementById("lockText").innerText = "ACCESS DENIED";
+        document.getElementById("lockText").innerText = `ACCESS DENIED - ${secs}s`;
+
+        if(!lockInterval){
+            lockInterval = setInterval(updateLock, 250);
+        }
         return true;
     }
 
     lockScreen.classList.remove("active");
+
+    if(lockInterval){
+        clearInterval(lockInterval);
+        lockInterval = null;
+    }
+
     return false;
 }
 
-/* MONEY CHANGE */
+/* MONEY */
 function changeMoney(amount){
     const now = Date.now();
 
@@ -250,7 +274,7 @@ function changeMoney(amount){
     playSound(amount>0 ? "plus" : "minus");
 }
 
-/* UNLOCK BUTTON */
+/* UNLOCK */
 unlockBtn.addEventListener("click", ()=>{
     if(updateLock()) return;
 
@@ -280,14 +304,36 @@ unlockBtn.addEventListener("click", ()=>{
     }
 });
 
-/* INIT UI */
+/* INIT */
 moneyEl.textContent = `$${money}`;
 updateLock();
 
-/* SPARKLES */
+/* SPARKLES CONTROLLED */
 window.addEventListener("mousemove",(e)=>{
     const now = Date.now();
-    if(now % 20 !== 0) return;
+
+    if(updateLock()) return;
+    if(now < lockUntil) return;
+
+    // no sparkles on HUD
+    if(e.target.closest(".hud")) return;
+
+    // idle reset
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(()=>{
+        sparkleStart = 0;
+        sparkleArmed = true;
+    }, 500);
+
+    if(!sparkleArmed) return;
+
+    if(sparkleStart === 0) sparkleStart = now;
+
+    // only first few seconds of movement
+    if(now - sparkleStart > 2500){
+        sparkleArmed = false;
+        return;
+    }
 
     for(let i=0;i<2;i++){
         const sp = document.createElement("div");
