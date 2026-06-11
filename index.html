@@ -165,7 +165,7 @@ function playSound(type){
     osc.connect(gain);
     gain.connect(audioCtx.destination);
 
-    let freq = 300, duration = 0.12;
+    let freq = 300, duration = 0.12, typeWave = "sine";
 
     switch(type){
         case "click": freq=300; duration=0.06; break;
@@ -174,13 +174,32 @@ function playSound(type){
         case "success": freq=950; duration=0.25; break;
         case "error": freq=110; duration=0.3; break;
         case "lock": freq=70; duration=0.4; break;
-        case "sparkle": freq=1200; duration=0.05; break;
+        case "sparkle": 
+            duration = 0.2;
+            typeWave = "triangle";
+
+            // Create a short ascending chime
+            let freqs = [1200, 1350, 1500].map(f => f + Math.random()*50); 
+            let startTime = audioCtx.currentTime;
+            freqs.forEach((f, i)=>{
+                const o = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                o.type = "triangle";
+                o.frequency.value = f;
+                o.connect(g);
+                g.connect(audioCtx.destination);
+                g.gain.setValueAtTime(0.05, startTime + i*0.03);
+                g.gain.exponentialRampToValueAtTime(0.0001, startTime + i*0.03 + 0.15);
+                o.start(startTime + i*0.03);
+                o.stop(startTime + i*0.03 + 0.15);
+            });
+            return; // stop normal single oscillator for sparkle
     }
 
     osc.frequency.value = freq;
-    osc.type = "sine";
+    osc.type = typeWave;
 
-    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    gain.gain.setValueAtTime(type === "sparkle" ? 0.08 : 0.15, audioCtx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
 
     osc.start();
@@ -257,7 +276,5 @@ for(let i=0;i<200;i++){
 
     space.appendChild(s);
 }
-</script>
 
-</body>
-</html>
+/*end*/
