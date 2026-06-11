@@ -16,26 +16,12 @@ body{
     color:white;
 }
 
-.space{
-    position:fixed;
-    inset:0;
-    background:
-        radial-gradient(circle at 20% 30%, #1a1f3c, transparent 40%),
-        radial-gradient(circle at 80% 70%, #2b0f3a, transparent 45%),
-        radial-gradient(circle at center, #050816, #000);
-}
-
-.star{
-    position:absolute;
-    border-radius:50%;
-    background:radial-gradient(circle,#fff,transparent);
-    animation:floatStar linear infinite;
-    opacity:.5;
-}
-
-@keyframes floatStar{
-    from{ transform:translateY(0); opacity:.3; }
-    to{ transform:translateY(-120vh); opacity:.8; }
+/* UPDATED BACKGROUND ONLY */
+.space {
+    position: fixed;
+    inset: 0;
+    background: black;
+    overflow: hidden;
 }
 
 .hud{
@@ -184,7 +170,6 @@ function playSound(type){
     }
 
     if(type === "sparkle"){
-        // sharper "clink" sound
         const o = audioCtx.createOscillator();
         const g = audioCtx.createGain();
 
@@ -308,6 +293,63 @@ unlockBtn.addEventListener("click", ()=>{
 moneyEl.textContent = `$${money}`;
 updateLock();
 
+/* REALISTIC STARFIELD BACKGROUND */
+const space = document.getElementById("space");
+const canvas = document.createElement("canvas");
+space.appendChild(canvas);
+
+const ctx = canvas.getContext("2d");
+
+function resize(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resize();
+
+const stars = [];
+const STAR_COUNT = 220;
+
+for (let i = 0; i < STAR_COUNT; i++) {
+    stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        z: Math.random() * canvas.width,
+        size: Math.random() * 1.8 + 0.3,
+        speed: Math.random() * 0.02 + 0.01
+    });
+}
+
+function animateStars() {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    for (let star of stars) {
+        star.z -= star.speed * 120;
+
+        if (star.z <= 0) {
+            star.z = canvas.width;
+            star.x = Math.random() * canvas.width;
+            star.y = Math.random() * canvas.height;
+        }
+
+        const k = 128 / star.z;
+        const x = (star.x - canvas.width / 2) * k + canvas.width / 2;
+        const y = (star.y - canvas.height / 2) * k + canvas.height / 2;
+        const size = star.size * k;
+
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fillStyle = "white";
+        ctx.fill();
+    }
+
+    requestAnimationFrame(animateStars);
+}
+
+animateStars();
+
+window.addEventListener("resize", resize);
+
 /* SPARKLES CONTROLLED */
 window.addEventListener("mousemove",(e)=>{
     const now = Date.now();
@@ -315,10 +357,8 @@ window.addEventListener("mousemove",(e)=>{
     if(updateLock()) return;
     if(now < lockUntil) return;
 
-    // no sparkles on HUD
     if(e.target.closest(".hud")) return;
 
-    // idle reset
     clearTimeout(idleTimer);
     idleTimer = setTimeout(()=>{
         sparkleStart = 0;
@@ -329,7 +369,6 @@ window.addEventListener("mousemove",(e)=>{
 
     if(sparkleStart === 0) sparkleStart = now;
 
-    // only first few seconds of movement
     if(now - sparkleStart > 2500){
         sparkleArmed = false;
         return;
